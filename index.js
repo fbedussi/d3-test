@@ -2,15 +2,16 @@
 const margin = {top: 10, right: 30, bottom: 40, left: 50}
 const width = 520 - margin.left - margin.right
 const height = 520 - margin.top - margin.bottom
+const xLabelDistance = 30
 
 // append the svg object to the body of the page
 const svg = d3.select("#my_dataviz")
   .append("svg")
     .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
+    .attr("height", height + margin.top + margin.bottom + (xLabelDistance * 2))
   .append("g")
     .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")")
+          `translate(${margin.left}, ${margin.top + (xLabelDistance * 2)})`)
 
 // Add the grey background that makes ggplot2 famous
 svg
@@ -22,21 +23,23 @@ svg
     .style("fill", "#fff")
 
 
-function createYAxis(y, left = true) {
+function createYAxis(y) {
   const yAxis = svg.append("g")
-    .call(left ? d3.axisLeft(y).tickSize(0).ticks(5) : d3.axisRight(y).tickSize(0).ticks(5))
+    .call(d3.axisLeft(y).tickSize(0).ticks(5))
     
   yAxis.select(".domain").remove()
 
   yAxis.selectAll('text').attr('fill', 'white').attr('font-size', 15)
 
+  const labelBoxWidth = 15
+  const labelBoxHeight = 80
   yAxis.selectAll('.tick')
     .insert('rect', ":first-child")
-    .attr('x', function(tickText,index,rects){return rects[index].getBBox().x - 15})
-    .attr('y', function(tickText,index,rects){return rects[index].getBBox().y - 40})
-    .attr('width', function(tickText,index,rects){return rects[index].getBBox().width + 15})
+    .attr('x', function(tickText,index,rects){return rects[index].getBBox().x - labelBoxWidth})
+    .attr('y', function(tickText,index,rects){return rects[index].getBBox().y - (labelBoxHeight/2)})
+    .attr('width', function(tickText,index,rects){return rects[index].getBBox().width + labelBoxWidth})
     .attr('rx', 5)
-    .attr('height', '80')
+    .attr('height', labelBoxHeight)
     .style('stroke', 'none')
     .style('fill', 'lightgrey')
 
@@ -46,24 +49,46 @@ function createYAxis(y, left = true) {
 function draw(data) {
   // Add X axis
   const x = d3.scaleLinear()
-    .domain([-30, 30])
+    .domain([-29.9, 29.9])
     .range([ 0, width ])
     
+  const xLabelOffset = 10
   const xAxis = svg.append("g")
-    .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(x).tickSize(-height*1.3).ticks(10))
+    .attr("transform", `translate(0,${height + 0})`)
+    .call(d3.axisBottom(x).tickSize(-height - xLabelOffset).ticks(30))
   
   xAxis.select(".domain").remove()
   
   xAxis.selectAll('line').attr('stroke-width', (a) =>{ 
     if(a === 0) {
         return 5
-    } else if (a % 2 === 0) {
+    } else if (a % 10 === 0) {
       return 2
     } else {
-      return 1
+      return 0.5
     }
   })
+
+  xAxis.selectAll('text')
+    .attr('transform', `translate(0, ${xLabelDistance})`)
+    .style('display', d => d % 10 === 0 ? 'block' : 'none')
+
+  const xAxisTop = svg.append("g")
+    .attr("transform", `translate(0,${-xLabelDistance - xLabelOffset})`)
+    .call(d3.axisTop(x).tickSize(0).ticks(30))
+  xAxisTop.select(".domain").remove()
+  xAxisTop.selectAll('text')
+    .style('display', d => d % 10 === 0 ? 'block' : 'none')
+
+
+  const line0Offset = 20
+  xAxis.selectAll("line")
+    .attr("y2", function(d){
+      return -(height + xLabelOffset + (d === 0 ? line0Offset : 0 ))
+    })
+    .attr("y1", function(d){
+      return d === 0 ? line0Offset : 0
+    });
 
   // Add Y axis
   const y = d3.scaleLinear()
