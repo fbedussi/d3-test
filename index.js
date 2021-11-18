@@ -5,13 +5,11 @@ const height = 520 - margin.top - margin.bottom
 const xLabelDistance = 30
 
 // append the svg object to the body of the page
-const svg = d3.select("#my_dataviz")
+const svg = d3.select("#graph")
   .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom + (xLabelDistance * 3))
+    .attr("viewBox", `0 0 300 600`)
   .append("g")
-    .attr("transform",
-          `translate(${margin.left}, ${margin.top + (xLabelDistance * 2)})`)
+    .attr("transform", `translate(${-(margin.left + 10)}, ${margin.top + (xLabelDistance * 2)})`)
 
 // Add the grey background that makes ggplot2 famous
 svg
@@ -102,7 +100,6 @@ function draw(data) {
   yAxisRight
     .style('transform', `translateX(${width + 20}px)`)
     
-  // Customization
   svg.selectAll(".tick line").attr("stroke", "black")
 
   const getColor = d => d.eye === 'R' ? '#a34eff' : '#2fa59e'
