@@ -104,28 +104,31 @@ function draw(data) {
 
   const getColor = d => d.eye === 'R' ? '#a34eff' : '#2fa59e'
 
+  const firstPointsThreshold = 2
+
   // Add dots
   svg.append('g')
     .selectAll("dot")
     .data(data)
     .enter()
     .append('g')
-    .attr('class', (d, index) => `points ${index < 2 ? 'first ' : ''}`)
+    .attr('class', (d, index) => `points ${index < firstPointsThreshold ? 'first ' : ''}`)
     .append("circle")
-      .attr('class', (d, index) => {
+      .attr('class', d => {
         return d.eye === 'R' ? `purple-shadow` : `green-shadow`
       })
       .attr("cx", d => x(d.x))
       .attr("cy", d => y(d.y))
-      .attr("r", 7)
+      .attr("r", (_, index) => index < firstPointsThreshold ? 6 : 7)
       .style("stroke", getColor)
+      .style("stroke-width", (_, index) => index < firstPointsThreshold ? 2 : 1)
       .style("fill", '#fff')
 
   svg.selectAll(".points")
     .append("circle")
     .attr("cx", d => x(d.x))
     .attr("cy", d => y(d.y))
-    .attr("r", 5)
+    .attr("r", (_, index) => index < firstPointsThreshold ? 2 : 5)
     .style("fill", getColor)
 
   const svgImage = '<path d="M114.8,161v808.5c0,5.7,2.4,10.3,5.9,13.7c4.8,4.6,9.5,6.9,15.5,6.9h41.6c5.9,0,10.7-2.3,15.5-6.9c3.6-3.4,5.9-8,5.9-13.7V161c28.6-16,42.8-38.9,42.8-69.7c0-22.9-8.3-42.3-25-58.3C200.5,18,180.2,10,157.7,10c-23.8,0-44,8-60.7,22.9c-16.6,16-25,35.5-25,58.3C72,122.1,86.3,145,114.8,161L114.8,161z M251.3,734.2c5.8,8,12.5,12.6,20.9,12.6c5,0,10-2.3,15-5.7c84.4-61.9,157.1-92.8,216.4-92.8c22.6,0,45.1,4.6,66.8,13.7c20.9,9.2,39.3,19.5,53.5,31c14.2,11.5,30.9,21.8,51,30.9c19.2,9.2,38.4,13.8,56.8,13.8c48.5,0,105.3-25.2,172.1-74.5c8.4-5.8,15-11.5,18.4-17.2c4.2-5.7,5.8-13.7,5.8-25.2V133.5c0-11.5-2.5-20.6-8.3-28.7c-5.8-8-13.4-12.6-20.9-12.6c-4.2,0-12.5,4.6-25.9,13.7c-12.5,9.2-26.7,18.3-40.9,29.8c-14.2,11.4-31.7,20.6-51,29.8c-20.1,9.2-38.4,13.8-55.2,13.8c-15,0-29.2-4.6-40.9-12.6c-39.2-25.2-72.7-43.6-101.9-56.2c-29.2-12.6-60.1-18.3-93.6-18.3c-57.7,0-122.8,25.2-196.3,76.8c-17.6,12.6-30.1,21.8-36.8,27.5c-9.2,9.2-14.2,21.8-14.2,35.5v473.4C242.1,717,245.5,726.2,251.3,734.2L251.3,734.2z"/>'
@@ -140,4 +143,6 @@ function draw(data) {
     .html(svgImage)
 }
 
-draw([{x: -20, y: 1, eye: 'L'}, {x: -10, y: 2, eye: 'R'}, {x: 0, y: 2, eye: 'L'}, {x: 10, y: 3, eye: 'R'}])
+const data = [{sphere: -20, eye: 'L'}, {sphere: -10, eye: 'R'}, {sphere: 0, eye: 'L'}, {sphere: 10, eye: 'R'}].map(({sphere, eye}, index) => ({x: sphere, y: Math.floor(index / 2) + ((index + 1) % 2 === 0 ? 1.2 : 0.8), eye}))
+draw(data)
+
